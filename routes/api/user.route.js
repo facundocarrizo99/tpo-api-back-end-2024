@@ -9,7 +9,7 @@ var Authorization = require('../../auth/authorization');
 router.get('/', function(req, res, next) {
     res.send('Llegaste a la ruta de  api/user.routes');
   });
-router.post('/registration', UserController.createUser)
+router.post('/registration', UserController.createUser) //http://localhost:3000/api/users/registration
 router.post('/login/', UserController.loginUser)
 router.get('/users',Authorization, UserController.getUsers)
 router.post('/userByMail', Authorization, UserController.getUsersByMail)
