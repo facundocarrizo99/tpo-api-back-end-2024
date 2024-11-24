@@ -16,10 +16,17 @@ exports.getGroups = async function (query, page, limit) {
     }
     // Try Catch the awaited promise to handle the error 
     try {
-        console.log("Query",query)
-        var Groups = await Group.paginate(query, options)
+        console.log("Query",query);
+        var groups = await Group.find(query, options);
+        var groupsData = [];
+        for (let i = 0; i < groups.length; i++) {
+            var oneGroup = await Group.findOne({_id: groups[i]._id});
+            if (oneGroup) {
+                groupsData.push(oneGroup);
+            }
+        }
         // Return the Groupd list that was retured by the mongoose promise
-        return Groups;
+        return groupsData;
 
     } catch (e) {
         // return a Error message describing the reason 
@@ -28,26 +35,19 @@ exports.getGroups = async function (query, page, limit) {
     }
 }
 
-exports.createGroup = async function (Group) {
+exports.createGroup = async function (group) {
     // Creating a new Mongoose Object by using the new keyword
-    var hashedPassword = bcrypt.hashSync(Group.password, 8);
-
     var newGroup = new Group({
-        name: Group.name,
-        email: Group.email,
+        name: group.name,
+        description: group.description,
+        participants: group.participants,
+        expenses: [],
         date: new Date(),
-        password: hashedPassword
     })
 
     try {
-        // Saving the Group 
-        var savedGroup = await newGroup.save();
-        var token = jwt.sign({
-            id: savedGroup._id
-        }, process.env.SECRET, {
-            expiresIn: 86400 // expires in 24 hours
-        });
-        return token;
+        // Saving the Group
+        return await newGroup.save();
     } catch (e) {
         // return a Error message describing the reason 
         console.log(e)
@@ -99,28 +99,12 @@ exports.deleteGroup = async function (id) {
     }
 }
 
-
-exports.loginGroup = async function (Group) {
-
-    // Creating a new Mongoose Object by using the new keyword
-    try {
-        // Find the Group 
-        console.log("login:",Group)
-        var _details = await Group.findOne({
-            email: Group.email
-        });
-        var passwordIsValid = bcrypt.compareSync(Group.password, _details.password);
-        if (!passwordIsValid) return 0;
-
-        var token = jwt.sign({
-            id: _details._id
-        }, process.env.SECRET, {
-            expiresIn: 86400 // expires in 24 hours
-        });
-        return {token:token, Group:_details};
-    } catch (e) {
-        // return a Error message describing the reason     
-        throw Error("Error while Login Group")
+exports.getOneGroup = async function (id) {
+        try {
+        var group = await Group.findOne(id)
+        return group;
     }
-
+    catch (e) {
+        throw Error("Error while getting the Group")
+    }
 }

@@ -1,4 +1,5 @@
 var UserService = require('../services/user.service');
+const mongoose = require("mongoose");
 
 
 // Saving the context of this module inside the _the variable
@@ -24,7 +25,7 @@ exports.getUsersByMail = async function (req, res, next) {
     // Check the existence of the query parameters, If doesn't exists assign a default value
     var page = req.query.page ? req.query.page : 1
     var limit = req.query.limit ? req.query.limit : 10;
-    let filtro= {email: req.body.email}
+    let filtro = {email: req.body.email}
     console.log(filtro)
     try {
         var Users = await UserService.getUsers(filtro, page, limit)
@@ -38,7 +39,7 @@ exports.getUsersByMail = async function (req, res, next) {
 
 exports.createUser = async function (req, res, next) {
     // Req.Body contains the form submit values.
-    console.log("llegue al controller",req.body)
+    console.log("llegue al controller", req.body)
     var User = {
         name: req.body.name,
         email: req.body.email,
@@ -62,9 +63,8 @@ exports.updateUser = async function (req, res, next) {
         return res.status(400).json({status: 400., message: "Name be present"})
     }
 
-    
     var User = {
-       
+
         name: req.body.name ? req.body.name : null,
         email: req.body.email ? req.body.email : null,
         password: req.body.password ? req.body.password : null
@@ -83,7 +83,7 @@ exports.removeUser = async function (req, res, next) {
     var id = req.body.id;
     try {
         var deleted = await UserService.deleteUser(id);
-        res.status(200).send("Succesfully Deleted... ");
+        res.status(200).json({message: "Successfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -92,7 +92,7 @@ exports.removeUser = async function (req, res, next) {
 
 exports.loginUser = async function (req, res, next) {
     // Req.Body contains the form submit values.
-    console.log("body",req.body)
+    console.log("body", req.body)
     var User = {
         email: req.body.email,
         password: req.body.password
@@ -100,7 +100,7 @@ exports.loginUser = async function (req, res, next) {
     try {
         // Calling the Service function with the new object from the Request Body
         var loginUser = await UserService.loginUser(User);
-        if (loginUser===0)
+        if (loginUser === 0)
             return res.status(400).json({message: "Error en la contraseña"})
         else
             return res.status(200).json({loginUser, message: "Succesfully login"})

@@ -2,6 +2,7 @@
 var User = require('../models/User.model');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 // Saving the context of this module inside the _the variable
 _this = this
@@ -16,14 +17,14 @@ exports.getUsers = async function (query, page, limit) {
     }
     // Try Catch the awaited promise to handle the error 
     try {
-        console.log("Query",query)
+        console.log("Query", query)
         var Users = await User.paginate(query, options)
         // Return the Userd list that was retured by the mongoose promise
         return Users;
 
     } catch (e) {
         // return a Error message describing the reason 
-        console.log("error services",e)
+        console.log("error services", e)
         throw Error('Error while Paginating Users');
     }
 }
@@ -31,7 +32,7 @@ exports.getUsers = async function (query, page, limit) {
 exports.createUser = async function (user) {
     // Creating a new Mongoose Object by using the new keyword
     var hashedPassword = bcrypt.hashSync(user.password, 8);
-    
+
     var newUser = new User({
         name: user.name,
         email: user.email,
@@ -50,19 +51,19 @@ exports.createUser = async function (user) {
         return token;
     } catch (e) {
         // return a Error message describing the reason 
-        console.log(e)    
+        console.log(e)
         throw Error("Error while Creating User")
     }
 }
 
 exports.updateUser = async function (user) {
-    
-    var id = {name :user.name}
+
+    var id = {id: user.id}
     console.log(id)
     try {
         //Find the old User Object by the Id
         var oldUser = await User.findOne(id);
-        console.log (oldUser)
+        console.log(oldUser)
     } catch (e) {
         throw Error("Error occured while Finding the User")
     }
@@ -86,16 +87,18 @@ exports.updateUser = async function (user) {
 exports.deleteUser = async function (id) {
     console.log(id)
     // Delete the User
+    const objectId = new mongoose.Types.ObjectId(id);
     try {
-        var deleted = await User.remove({
-            _id: id
+        var deleted = await User.deleteOne({
+            _id: objectId
         })
         if (deleted.n === 0 && deleted.ok === 1) {
             throw Error("User Could not be deleted")
         }
         return deleted;
     } catch (e) {
-        throw Error("Error Occured while Deleting the User")
+        console.error("Error occurred while deleting user:", e);
+        throw Error("Error Occured while Deleting the User" + e.message)
     }
 }
 
@@ -105,7 +108,7 @@ exports.loginUser = async function (user) {
     // Creating a new Mongoose Object by using the new keyword
     try {
         // Find the User 
-        console.log("login:",user)
+        console.log("login:", user)
         var _details = await User.findOne({
             email: user.email
         });
@@ -117,7 +120,7 @@ exports.loginUser = async function (user) {
         }, process.env.SECRET, {
             expiresIn: 86400 // expires in 24 hours
         });
-        return {token:token, user:_details};
+        return {token: token, user: _details};
     } catch (e) {
         // return a Error message describing the reason     
         throw Error("Error while Login User")

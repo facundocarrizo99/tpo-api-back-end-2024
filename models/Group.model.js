@@ -7,8 +7,8 @@ const {ObjectId} = require("mongodb");
 var GroupSchema = new mongoose.Schema({
     name: String,
     description: String,
-    owner: ObjectId,
     participants: [ObjectId],
+    expenses: [ObjectId],
     date: Date
 })
 

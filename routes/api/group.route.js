@@ -9,9 +9,9 @@ var Authorization = require('../../auth/authorization');
 router.get('/', function(req, res, next) {
     res.send('Llegaste a la ruta de  api/group.routes');
 });
-router.post('/create', GroupController.createGroup)
-router.get('/users',Authorization, GroupController.getGroups)
-router.post('/userByMail', Authorization, GroupController.getGroupByObjectID)
+router.post('/create', Authorization, GroupController.createGroup)
+router.get('/myGroups', Authorization, GroupController.getGroups)
+router.get('/groupByID', Authorization, GroupController.getGroupByObjectID)
 router.put('/update', Authorization, GroupController.updateGroup)
 router.delete('/delete', Authorization, GroupController.removeGroup)
 
