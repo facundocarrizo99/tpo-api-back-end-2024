@@ -1,9 +1,9 @@
 // Gettign the Newly created Mongoose Model we just created 
-var Group = require('../models/Group.model');
-var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
+const Group = require('../models/Group.model');
 const Ticket = require("../models/Ticket.model");
+const Arreglo = require("../models/Arreglo.model");
 const TicketService = require("../services/ticket.service");
+const ArregloService = require("../services/arreglo.service");
 const mongoose = require('mongoose');
 
 // Saving the context of this module inside the _the variable
@@ -45,6 +45,7 @@ exports.createGroup = async function (group) {
         description: group.description,
         participants: group.participants,
         expenses: [],
+        arreglos: [],
         date: new Date(),
     })
 
@@ -176,8 +177,77 @@ exports.getAllTicketsOfOneGroup = async function (groupQuery) {
 
 exports.updateTicket = async function (ticket) {
     try {
-        var savedticket = await TicketService.updateTicket(ticket);
-        return savedticket;
+        return await TicketService.updateTicket(ticket);
+    } catch (e) {
+        throw Error("And Error occured while updating the ticket");
+    }
+}
+
+exports.createArreglo = async function (ticket) {
+    // Creating a new Mongoose Object by using the new keyword
+    var newArreglo = await ArregloService.createArreglo(ticket)
+    console.log(newArreglo)
+    try {
+        //Find the old Group Object by the Id
+        var oldGroup = await Group.findOne({_id: ticket.groupid});
+        console.log (oldGroup)
+    } catch (e) {
+        throw Error("Error occured while Finding the Group")
+    }
+    if (!oldGroup) {
+        return false;
+    }
+    try {
+        oldGroup.arreglos.push(newArreglo._id);
+        await oldGroup.save();
+        return newArreglo;
+    } catch (e) {
+        throw Error("And Error occured while updating the Group");
+    }
+}
+
+exports.deleteArreglo = async function (ticket) {
+    var newTicket = await ArregloService.deleteArreglo(ticket.arregloid)
+    console.log(newTicket)
+    try {
+        //Find the old Group Object by the Id
+        var oldGroup = await Group.findOne({_id: ticket.groupId});
+        console.log (oldGroup)
+    } catch (e) {
+        throw Error("Error occured while Finding the Group")
+    }
+    if (!oldGroup) {
+        return false;
+    }
+    var ticketToDelete = new mongoose.Types.ObjectId(ticket.arregloid);
+    const indexOfTicket = oldGroup.arreglos.indexOf(ticketToDelete);
+    if (indexOfTicket !== -1) {
+        oldGroup.arreglos.splice(indexOfTicket, 1);
+    }
+    try {
+        return await oldGroup.save();
+    } catch (e) {
+        throw Error("And Error occured while updating the Group");
+    }
+}
+
+exports.getAllArreglosOfOneGroup = async function (groupQuery) {
+    try {
+        var group = await Group.findOne(groupQuery);
+        var tickets = [];
+        for (let i = 0; i < group.arreglos.length; i++) {
+            var ticket = await Arreglo.findOne({_id: group.arreglos[i]._id});
+            tickets.push(ticket);
+        }
+        return tickets;
+    } catch (e) {
+        throw Error("Error while getting the Tickets")
+    }
+}
+
+exports.updateArreglo = async function (ticket) {
+    try {
+        return await ArregloService.updateArreglo(ticket);
     } catch (e) {
         throw Error("And Error occured while updating the ticket");
     }

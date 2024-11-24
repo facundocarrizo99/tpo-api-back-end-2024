@@ -8,6 +8,7 @@ var GroupSchema = new mongoose.Schema({
     description: String,
     participants: [ObjectId],
     expenses: [ObjectId],
+    arreglos: [ObjectId],
     date: Date
 })
 

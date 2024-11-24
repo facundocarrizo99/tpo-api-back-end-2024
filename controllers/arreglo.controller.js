@@ -1,31 +1,23 @@
-var GroupService = require('../services/Group.service');
 const User = require("../models/User.model");
+const Arreglo = require("../models/Arreglo.model");
+const GroupService = require("../services/group.service");
 
-exports.createTicket = async function (req, res, next) {
+exports.createArreglo = async function (req, res, next) {
     // Req.Body contains the form submit values.
     console.log("llegue al controller Ticket", req.body)
 
-    var participantsIDs = []
-    for (let i = 0; i < req.body.participants.length; i++) {
-        var user = await User.findOne({email: {$in: req.body.participants[i]}})
-        if (user) {
-            participantsIDs.push(user._id)
-        }
-    }
-
-    var Ticket = {
+    var arreglo = {
         name: req.body.name,
         description: req.body.description,
-        owner: await User.findOne({email: req.body.owner}),
-        participants: participantsIDs,
+        payer: await User.findOne({email: req.body.payer}),
+        receiver: await User.findOne({email: req.body.receiver}),
         amount: req.body.amount,
-        groupId: req.headers.groupid
+        groupid: req.headers.groupid
     }
-    console.log(participantsIDs)
     try {
         // Calling the Service function with the new object from the Request Body
-        var createdTicket = await GroupService.createTicket(Ticket)
-        return res.status(201).json({createdTicket, message: "Succesfully Created Ticket"})
+        var createdArreglo = await GroupService.createArreglo(arreglo)
+        return res.status(201).json({createdArreglo, message: "Succesfully Created Ticket"})
     } catch (e) {
         //Return an Error Response Message with Code and the Error Message.
         console.log(e)
@@ -34,54 +26,45 @@ exports.createTicket = async function (req, res, next) {
 }
 
 
-exports.updateTicket = async function (req, res, next) {
+exports.updateArreglo = async function (req, res, next) {
     if (!req.body.name) {
         return res.status(400).json({status: 400., message: "Name be present"})
     }
-
-    var participantsIDs = []
-    for (let i = 0; i < req.body.participants.length; i++) {
-        var user = await User.findOne({email: {$in: req.body.participants[i]}})
-        if (user) {
-            participantsIDs.push(user._id)
-        }
-    }
-
     var ticket = {
         groupid: req.headers.groupid,
-        ticketid: req.headers.ticketid,
+        arregloid: req.headers.arregloid,
         name: req.body.name ? req.body.name : null,
         description: req.body.description ? req.body.description : null,
-        participants: req.body.participants ? participantsIDs : null,
+        payer: req.body.payer ? await User.findOne({email: req.body.payer}) : null,
+        receiver: req.body.receiver ? await User.findOne({email: req.body.receiver}): null,
         amount: req.body.amount ? req.body.amount : null,
-        owner: req.body.owner ? await User.findOne({email: {$in: req.body.owner}}) : null
     }
 
     try {
-        var updatedGroup = await GroupService.updateTicket(ticket)
+        var updatedGroup = await GroupService.updateArreglo(ticket)
         return res.status(200).json({status: 200, data: updatedGroup, message: "Succesfully Updated Group"})
     } catch (e) {
         return res.status(400).json({status: 400., message: e.message})
     }
 }
 
-exports.removeTicket = async function (req, res, next) {
+exports.removeArreglo = async function (req, res, next) {
     var Ticket = {
-        ticketid: req.body.ticketid,
+        arregloid: req.body.arregloid,
         groupId: req.headers.groupid
     }
     try {
-        var deleted = await GroupService.deleteTicket(Ticket);
+        var deleted = await GroupService.deleteArreglo(Ticket);
         res.status(200).json({message: "Successfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
 }
 
-exports.getTickets = async function (req, res, next) {
+exports.getArreglos = async function (req, res, next) {
     // Req.Body contains the form submit values.
     try {
-        var tickets = await GroupService.getAllTicketsOfOneGroup({_id: req.headers.groupid})
+        var tickets = await GroupService.getAllArreglosOfOneGroup({_id: req.headers.groupid})
         // Return the Groups list with the appropriate HTTP password Code and Message.
         return res.status(200).json({status: 200, data: tickets, message: "Succesfully Groups Recieved"});
     } catch (e) {
@@ -89,4 +72,3 @@ exports.getTickets = async function (req, res, next) {
         return res.status(400).json({status: 400, message: e.message});
     }
 }
-

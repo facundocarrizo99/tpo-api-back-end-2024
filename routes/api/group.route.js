@@ -1,6 +1,8 @@
 var express = require('express')
 var router = express.Router()
 var GroupController = require('../../controllers/group.controller');
+var TicketController = require('../../controllers/ticket.controller');
+var ArregloController = require('../../controllers/arreglo.controller');
 var Authorization = require('../../auth/authorization');
 
 
@@ -14,12 +16,14 @@ router.get('/myGroups', Authorization, GroupController.getGroups)
 router.get('/groupByID', Authorization, GroupController.getGroupByObjectID)
 router.put('/update', Authorization, GroupController.updateGroup)
 router.delete('/delete', Authorization, GroupController.removeGroup)
-router.post('/createTicket', Authorization, GroupController.createTicket)
-router.put('/updateTicket', Authorization, GroupController.updateTicket)
-router.delete('/deleteTicket', Authorization, GroupController.removeTicket)
-router.get('/group/tickets', Authorization, GroupController.getTickets)
-
-
+router.post('/createTicket', Authorization, TicketController.createTicket)
+router.put('/updateTicket', Authorization, TicketController.updateTicket)
+router.delete('/deleteTicket', Authorization, TicketController.removeTicket)
+router.get('/group/tickets', Authorization, TicketController.getTickets)
+router.post('/createArreglo', Authorization, ArregloController.createArreglo)
+router.put('/updateArreglo', Authorization, ArregloController.updateArreglo)
+router.delete('/deleteArreglo', Authorization, ArregloController.removeArreglo)
+router.get('/group/arreglos', Authorization, ArregloController.getArreglos)
 
 // Export the Router
 module.exports = router;
