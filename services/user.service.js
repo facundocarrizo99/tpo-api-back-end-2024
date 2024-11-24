@@ -3,6 +3,7 @@ var User = require('../models/User.model');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const Group = require("../models/Group.model");
 
 // Saving the context of this module inside the _the variable
 _this = this
@@ -18,9 +19,16 @@ exports.getUsers = async function (query, page, limit) {
     // Try Catch the awaited promise to handle the error 
     try {
         console.log("Query", query)
-        var Users = await User.paginate(query, options)
+        var users = await User.find(query, options)
+        var usersData = [];
+        for (let i = 0; i < users.length; i++) {
+            var oneGroup = await User.findOne({_id: users[i]._id});
+            if (oneGroup) {
+                usersData.push(oneGroup);
+            }
+        }
         // Return the Userd list that was retured by the mongoose promise
-        return Users;
+        return usersData;
 
     } catch (e) {
         // return a Error message describing the reason 
