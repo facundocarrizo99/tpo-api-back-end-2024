@@ -3,15 +3,16 @@ var mongoosePaginate = require('mongoose-paginate')
 const {ObjectId} = require("mongodb");
 
 
-var GroupSchema = new mongoose.Schema({
+var TicketSchema = new mongoose.Schema({
     name: String,
     description: String,
+    owner: ObjectId,
     participants: [ObjectId],
-    expenses: [ObjectId],
+    amount: Number,
     date: Date
 })
 
-GroupSchema.plugin(mongoosePaginate)
-const Group = mongoose.model('Group', GroupSchema)
+TicketSchema.plugin(mongoosePaginate)
+const Ticket = mongoose.model('Ticket', TicketSchema)
 
-module.exports = Group;
+module.exports = Ticket;

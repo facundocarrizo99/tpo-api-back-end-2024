@@ -1,5 +1,6 @@
 var GroupService = require('../services/Group.service');
 const User = require("../models/User.model");
+var GroupController = require('../controllers/group.controller');
 
 
 // Saving the context of this module inside the _the variable
@@ -38,10 +39,7 @@ exports.getGroupByObjectID = async function (req, res, next) {
     }
 }
 
-exports.createGroup = async function (req, res, next) {
-    // Req.Body contains the form submit values.
-    console.log("llegue al controller", req.body)
-
+exports.interpretGroupParticipants = async function (req) {
     var participantsIDs = []
     for (let i = 0; i < req.body.participants.length; i++) {
         var user = await User.findOne({email: {$in: req.body.participants[i]}})
@@ -50,6 +48,14 @@ exports.createGroup = async function (req, res, next) {
         }
     }
     participantsIDs.push(req.userId)
+    return participantsIDs;
+}
+
+exports.createGroup = async function (req, res, next) {
+    // Req.Body contains the form submit values.
+    console.log("llegue al controller", req.body)
+
+    var participantsIDs = await GroupController.interpretGroupParticipants(req);
 
     var Group = {
         name: req.body.name,
@@ -70,16 +76,15 @@ exports.createGroup = async function (req, res, next) {
 
 exports.updateGroup = async function (req, res, next) {
 
-    // Id is necessary for the update
     if (!req.body.name) {
         return res.status(400).json({status: 400., message: "Name be present"})
     }
 
     var Group = {
-
+        id: req.headers.groupid,
         name: req.body.name ? req.body.name : null,
         description: req.body.description ? req.body.description : null,
-        participants: req.body.participants ? req.body.participants : null
+        participants: req.body.participants ? await GroupController.interpretGroupParticipants(req) : null
     }
 
     try {
@@ -92,18 +97,64 @@ exports.updateGroup = async function (req, res, next) {
 
 exports.removeGroup = async function (req, res, next) {
 
-    var id = req.body.id;
+    var id = req.headers.groupid;
     try {
         var deleted = await GroupService.deleteGroup(id);
-        res.status(200).send("Succesfully Deleted... ");
+        res.status(200).json({message: "Successfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
 }
 
+exports.createTicket = async function (req, res, next) {
+    // Req.Body contains the form submit values.
+    console.log("llegue al controller Ticket", req.body)
+
+    var participantsIDs = []
+    for (let i = 0; i < req.body.participants.length; i++) {
+        var user = await User.findOne({email: {$in: req.body.participants[i]}})
+        if (user) {
+            participantsIDs.push(user._id)
+        }
+    }
+
+    var Ticket = {
+        name: req.body.name,
+        description: req.body.description,
+        owner: await User.findOne({email: req.body.owner}),
+        participants: participantsIDs,
+        amount: req.body.amount,
+        groupId: req.headers.groupid
+    }
+    console.log(participantsIDs)
+    try {
+        // Calling the Service function with the new object from the Request Body
+        var createdTicket = await GroupService.createTicket(Ticket)
+        return res.status(201).json({createdTicket, message: "Succesfully Created Ticket"})
+    } catch (e) {
+        //Return an Error Response Message with Code and the Error Message.
+        console.log(e)
+        return res.status(400).json({status: 400, message: "Ticket Creation was Unsuccesfull"})
+    }
+}
 
 
+exports.updateTicket = async function (req, res, next) {
+    // Req.Body contains the form submit values.
+    return res.status(201).json({ message: "updateTicket" })
+}
 
-
+exports.removeTicket = async function (req, res, next) {
+    var Ticket = {
+        ticketid: req.body.ticketid,
+        groupId: req.headers.groupid
+    }
+    try {
+        var deleted = await GroupService.deleteTicket(Ticket);
+        res.status(200).json({message: "Successfully Deleted"});
+    } catch (e) {
+        return res.status(400).json({status: 400, message: e.message})
+    }
+}
 
 

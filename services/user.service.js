@@ -3,7 +3,6 @@ var User = require('../models/User.model');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const Group = require("../models/Group.model");
 
 // Saving the context of this module inside the _the variable
 _this = this
@@ -81,12 +80,11 @@ exports.updateUser = async function (user) {
     }
     //Edit the User Object
     var hashedPassword = bcrypt.hashSync(user.password, 8);
-    oldUser.name = user.name
-    oldUser.email = user.email
-    oldUser.password = hashedPassword
+    oldUser.name = user.name ? user.name : oldUser.name
+    oldUser.email = user.email ? user.email : oldUser.email
+    oldUser.password = hashedPassword ? hashedPassword : oldUser.password
     try {
-        var savedUser = await oldUser.save()
-        return savedUser;
+        return await oldUser.save();
     } catch (e) {
         throw Error("And Error occured while updating the User");
     }

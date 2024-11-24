@@ -2,6 +2,9 @@
 var Group = require('../models/Group.model');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+const Ticket = require("../models/Ticket.model");
+const TicketService = require("../services/ticket.service");
+const mongoose = require('mongoose');
 
 // Saving the context of this module inside the _the variable
 _this = this
@@ -55,9 +58,9 @@ exports.createGroup = async function (group) {
     }
 }
 
-exports.updateGroup = async function (Group) {
+exports.updateGroup = async function (group) {
 
-    var id = {name :Group.name}
+    var id = {_id: group.id}
     console.log(id)
     try {
         //Find the old Group Object by the Id
@@ -71,10 +74,9 @@ exports.updateGroup = async function (Group) {
         return false;
     }
     //Edit the Group Object
-    var hashedPassword = bcrypt.hashSync(Group.password, 8);
-    oldGroup.name = Group.name
-    oldGroup.email = Group.email
-    oldGroup.password = hashedPassword
+    oldGroup.name = group.name ? group.name : oldGroup.name
+    oldGroup.description = group.description ? group.description : oldGroup.description
+    oldGroup.participants = group.participants ? group.participants : oldGroup.participants
     try {
         var savedGroup = await oldGroup.save()
         return savedGroup;
@@ -87,7 +89,7 @@ exports.deleteGroup = async function (id) {
     console.log(id)
     // Delete the Group
     try {
-        var deleted = await Group.remove({
+        var deleted = await Group.deleteOne({
             _id: id
         })
         if (deleted.n === 0 && deleted.ok === 1) {
@@ -106,5 +108,53 @@ exports.getOneGroup = async function (id) {
     }
     catch (e) {
         throw Error("Error while getting the Group")
+    }
+}
+
+
+exports.createTicket = async function (ticket) {
+    // Creating a new Mongoose Object by using the new keyword
+    var newTicket = await TicketService.createTicket(ticket)
+    console.log(newTicket)
+    try {
+        //Find the old Group Object by the Id
+        var oldGroup = await Group.findOne({_id: ticket.groupId});
+        console.log (oldGroup)
+    } catch (e) {
+        throw Error("Error occured while Finding the Group")
+    }
+    if (!oldGroup) {
+        return false;
+    }
+    try {
+        oldGroup.expenses.push(newTicket._id)
+        return await oldGroup.save();
+    } catch (e) {
+        throw Error("And Error occured while updating the Group");
+    }
+}
+
+exports.deleteTicket = async function (ticket) {
+    var newTicket = await TicketService.deleteTicket(ticket.ticketid)
+    console.log(newTicket)
+    try {
+        //Find the old Group Object by the Id
+        var oldGroup = await Group.findOne({_id: ticket.groupId});
+        console.log (oldGroup)
+    } catch (e) {
+        throw Error("Error occured while Finding the Group")
+    }
+    if (!oldGroup) {
+        return false;
+    }
+    //todo no se updatea bien la lista de expenses
+    var ticketToDelete = new mongoose.Types.ObjectId(ticket.ticketid);
+    var newExpenses = oldGroup.expenses.filter(expense => expense !== ticketToDelete);
+    console.log(newExpenses)
+    try {
+        oldGroup.expenses = newExpenses;
+        return await oldGroup.save();
+    } catch (e) {
+        throw Error("And Error occured while updating the Group");
     }
 }
