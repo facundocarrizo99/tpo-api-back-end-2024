@@ -127,8 +127,9 @@ exports.createTicket = async function (ticket) {
         return false;
     }
     try {
-        oldGroup.expenses.push(newTicket._id)
-        return await oldGroup.save();
+        oldGroup.expenses.push(newTicket._id);
+        await oldGroup.save();
+        return newTicket;
     } catch (e) {
         throw Error("And Error occured while updating the Group");
     }
@@ -147,14 +148,37 @@ exports.deleteTicket = async function (ticket) {
     if (!oldGroup) {
         return false;
     }
-    //todo no se updatea bien la lista de expenses
     var ticketToDelete = new mongoose.Types.ObjectId(ticket.ticketid);
-    var newExpenses = oldGroup.expenses.filter(expense => expense !== ticketToDelete);
-    console.log(newExpenses)
+    const indexOfTicket = oldGroup.expenses.indexOf(ticketToDelete);
+    if (indexOfTicket !== -1) {
+        oldGroup.expenses.splice(indexOfTicket, 1);
+    }
     try {
-        oldGroup.expenses = newExpenses;
         return await oldGroup.save();
     } catch (e) {
         throw Error("And Error occured while updating the Group");
+    }
+}
+
+exports.getAllTicketsOfOneGroup = async function (groupQuery) {
+    try {
+        var group = await Group.findOne(groupQuery);
+        var tickets = [];
+        for (let i = 0; i < group.expenses.length; i++) {
+            var ticket = await Ticket.findOne({_id: group.expenses[i]._id});
+            tickets.push(ticket);
+        }
+        return tickets;
+    } catch (e) {
+        throw Error("Error while getting the Tickets")
+    }
+}
+
+exports.updateTicket = async function (ticket) {
+    try {
+        var savedticket = await TicketService.updateTicket(ticket);
+        return savedticket;
+    } catch (e) {
+        throw Error("And Error occured while updating the ticket");
     }
 }

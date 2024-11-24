@@ -25,7 +25,7 @@ exports.createTicket = async function (ticket) {
 
 exports.updateTicket = async function (ticket) {
 
-    var id = {_id: ticket.id}
+    var id = {_id: ticket.ticketid}
     console.log(id)
     try {
         //Find the old Group Object by the Id
@@ -64,5 +64,20 @@ exports.deleteTicket = async function (ticket) {
         return deleted;
     } catch (e) {
         throw Error("Error Occured while Deleting the Ticket")
+    }
+}
+
+exports.getTicketData = async function (ticket) {
+    console.log(ticket)
+    // Delete the Ticket
+    var id = {_id: ticket.id}
+    console.log(id)
+    try {
+        //Find the old Group Object by the Id
+        var oldTicket = await Ticket.findOne(id);
+        console.log (oldTicket)
+        return oldTicket;
+    } catch (e) {
+        throw Error("Error occured while Finding the Ticket")
     }
 }
