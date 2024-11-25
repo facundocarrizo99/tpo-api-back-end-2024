@@ -110,8 +110,8 @@ exports.getOneGroup = async function (id) {
         try {
         var group = await Group.findOne(id)
             .populate('participants', '_id name email')
-            .populate('expenses', {populate: {path: 'payer receiver', select: '_id name email',}})
-            .populate({path: 'arreglos'});
+            .populate('expenses')
+            .populate('arreglos');
         return group;
     }
     catch (e) {

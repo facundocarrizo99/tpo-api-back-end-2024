@@ -50,9 +50,13 @@ exports.createUser = async function (req, res, next) {
         var createdUser = await UserService.createUser(User)
         return res.status(201).json({createdUser, message: "Succesfully Created User"})
     } catch (e) {
-        //Return an Error Response Message with Code and the Error Message.
-        console.log(e)
-        return res.status(400).json({status: 400, message: "User Creation was Unsuccesfull"})
+        if (e.code === 11000) {
+            console.error('Error: Duplicate email');
+            return res.status(401).json({message: "Email already exists. Please use a different email."})
+        } else {
+            console.error('Error creating user:', e);
+            return res.status(400).json({message: "Error creating user. Please try again."})
+        }
     }
 }
 
