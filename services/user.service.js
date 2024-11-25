@@ -56,10 +56,14 @@ exports.createUser = async function (user) {
             expiresIn: 86400 // expires in 24 hours
         });
         return token;
-    } catch (e) {
-        // return a Error message describing the reason 
-        console.log(e)
-        throw Error("Error while Creating User")
+    } catch (err) {
+        if (err.code === 11000) {
+            console.error('Error: Duplicate email');
+            throw new Error('Email already exists. Please use a different email.');
+        } else {
+            console.error('Error creating user:', err);
+            throw err;
+        }
     }
 }
 
