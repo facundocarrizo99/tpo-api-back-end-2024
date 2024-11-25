@@ -12,6 +12,7 @@ exports.createTicket = async function (ticket) {
         description: ticket.description,
         owner: ticket.owner,
         participants: ticket.participants,
+        ticketPicture: ticket.picture ? ticket.picture : null,
         amount: ticket.amount,
         date: new Date(),
     })
@@ -44,6 +45,7 @@ exports.updateTicket = async function (ticket) {
     oldTicket.participants = ticket.participants ? ticket.participants : oldTicket.participants
     oldTicket.amount = ticket.amount ? ticket.amount : oldTicket.amount
     oldTicket.owner = ticket.owner ? ticket.owner : oldTicket.owner
+    oldTicket.ticketPicture = ticket.picture ? ticket.picture : oldTicket.ticketPicture
     try {
         return await oldTicket.save();
     } catch (e) {

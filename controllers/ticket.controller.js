@@ -18,6 +18,7 @@ exports.createTicket = async function (req, res, next) {
         description: req.body.description,
         owner: await User.findOne({email: req.body.owner}),
         participants: participantsIDs,
+        picture: req.body.picture,
         amount: req.body.amount,
         groupId: req.headers.groupid
     }
@@ -53,6 +54,7 @@ exports.updateTicket = async function (req, res, next) {
         name: req.body.name ? req.body.name : null,
         description: req.body.description ? req.body.description : null,
         participants: req.body.participants ? participantsIDs : null,
+        picture: req.body.picture ? req.body.picture : null,
         amount: req.body.amount ? req.body.amount : null,
         owner: req.body.owner ? await User.findOne({email: {$in: req.body.owner}}) : null
     }

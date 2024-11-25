@@ -44,7 +44,8 @@ exports.createUser = async function (user) {
         name: user.name,
         email: user.email,
         date: new Date(),
-        password: hashedPassword
+        password: hashedPassword,
+        profilePicture: user.picture ? user.picture : null
     })
 
     try {
@@ -68,7 +69,6 @@ exports.createUser = async function (user) {
 }
 
 exports.updateUser = async function (user) {
-
     var id = {id: user.id}
     console.log(id)
     try {
@@ -87,6 +87,7 @@ exports.updateUser = async function (user) {
     oldUser.name = user.name ? user.name : oldUser.name
     oldUser.email = user.email ? user.email : oldUser.email
     oldUser.password = hashedPassword ? hashedPassword : oldUser.password
+    oldUser.profilePicture = user.picture ? user.picture : oldUser.profilePicture
     try {
         return await oldUser.save();
     } catch (e) {

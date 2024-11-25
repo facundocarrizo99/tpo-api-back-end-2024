@@ -9,6 +9,7 @@ var TicketSchema = new mongoose.Schema({
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     amount: Number,
+    ticketPicture: { type: String, default: null },
     date: Date
 })
 
