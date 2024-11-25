@@ -6,8 +6,8 @@ const {ObjectId} = require("mongodb");
 var TicketSchema = new mongoose.Schema({
     name: String,
     description: String,
-    owner: ObjectId,
-    participants: [ObjectId],
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     amount: Number,
     date: Date
 })

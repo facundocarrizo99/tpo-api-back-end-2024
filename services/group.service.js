@@ -23,11 +23,15 @@ exports.getGroups = async function (query, page, limit) {
         var groups = await Group.find(query, options);
         var groupsData = [];
         for (let i = 0; i < groups.length; i++) {
-            var oneGroup = await Group.findOne({_id: groups[i]._id});
+            var oneGroup = await Group.findOne({_id: groups[i]._id})
+                        .populate('participants')
+                        .populate('expenses')
+                        .populate('arreglos');
             if (oneGroup) {
                 groupsData.push(oneGroup);
             }
         }
+        console.log(groupsData);
         // Return the Groupd list that was retured by the mongoose promise
         return groupsData;
 
@@ -105,6 +109,9 @@ exports.deleteGroup = async function (id) {
 exports.getOneGroup = async function (id) {
         try {
         var group = await Group.findOne(id)
+            .populate('participants', '_id name email')
+            .populate('expenses', {populate: {path: 'payer receiver', select: '_id name email',}})
+            .populate({path: 'arreglos'});
         return group;
     }
     catch (e) {
