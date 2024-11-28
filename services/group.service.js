@@ -24,7 +24,7 @@ exports.getGroups = async function (query, page, limit) {
         var groupsData = [];
         for (let i = 0; i < groups.length; i++) {
             var oneGroup = await Group.findOne({_id: groups[i]._id})
-                        .populate('participants', '_id name email profilePicture')
+                        .populate('participants', '_id name email')
                         .populate('expenses')
                         .populate('arreglos');
             if (oneGroup) {
