@@ -11,6 +11,7 @@ router.get('/', function(req, res, next) {
   });
 router.post('/registration', UserController.createUser) //http://localhost:3000/api/users/registration
 router.post('/login/', UserController.loginUser)
+router.post('/recoverPassword/', UserController.recoverPassword)
 router.get('/users',Authorization, UserController.getUsers)
 router.post('/userByMail', Authorization, UserController.getUsersByMail)
 router.put('/update', Authorization, UserController.updateUser)

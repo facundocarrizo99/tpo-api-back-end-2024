@@ -45,7 +45,8 @@ exports.createUser = async function (user) {
         email: user.email,
         date: new Date(),
         password: hashedPassword,
-        profilePicture: user.picture ? user.picture : null
+        profilePicture: user.picture ? user.picture : null,
+        safetyAnswer: user.safetyAnswer
     })
 
     try {
@@ -88,6 +89,7 @@ exports.updateUser = async function (user) {
     oldUser.email = user.email ? user.email : oldUser.email
     oldUser.password = hashedPassword ? hashedPassword : oldUser.password
     oldUser.profilePicture = user.picture ? user.picture : oldUser.profilePicture
+    oldUser.safetyAnswer = user.safetyAnswer ? user.safetyAnswer : oldUser.safetyAnswer
     try {
         return await oldUser.save();
     } catch (e) {
@@ -113,10 +115,7 @@ exports.deleteUser = async function (id) {
     }
 }
 
-
 exports.loginUser = async function (user) {
-
-    // Creating a new Mongoose Object by using the new keyword
     try {
         // Find the User 
         console.log("login:", user)
@@ -136,5 +135,26 @@ exports.loginUser = async function (user) {
         // return a Error message describing the reason     
         throw Error("Error while Login User")
     }
+}
 
+exports.recoverUser = async function (user) {
+    try {
+        // Find the User
+        console.log("recover:", user)
+        var _details = await User.findOne({
+            email: user.email
+        });
+        console.log(user.safetyAnswer, _details.safetyAnswer);
+        var passwordIsValid = user.safetyAnswer.localeCompare(_details.safetyAnswer);
+        if (!passwordIsValid === 0) return 0;
+        var token = jwt.sign({
+            id: _details._id
+        }, process.env.SECRET, {
+            expiresIn: 86400 // expires in 24 hours
+        });
+        return {token: token, user: _details};
+    } catch (e) {
+        // return a Error message describing the reason
+        throw Error("Error while Recovering User Password")
+    }
 }

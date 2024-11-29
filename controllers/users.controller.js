@@ -44,7 +44,8 @@ exports.createUser = async function (req, res, next) {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        picture: req.body.picture ? req.body.picture : null
+        picture: req.body.picture ? req.body.picture : null,
+        safetyAnswer: req.body.safetyAnswer
     }
     try {
         var createdUser = await UserService.createUser(User)
@@ -66,7 +67,8 @@ exports.updateUser = async function (req, res, next) {
         name: req.body.name ? req.body.name : null,
         email: req.body.email ? req.body.email : null,
         password: req.body.password ? req.body.password : null,
-        picture: req.body.picture ? req.body.picture : null
+        picture: req.body.picture ? req.body.picture : null,
+        safetyAnswer: req.body.safetyAnswer ? req.body.safetyAnswer : null
     }
 
     try {
@@ -88,7 +90,6 @@ exports.removeUser = async function (req, res, next) {
     }
 }
 
-
 exports.loginUser = async function (req, res, next) {
     // Req.Body contains the form submit values.
     console.log("body", req.body)
@@ -109,6 +110,24 @@ exports.loginUser = async function (req, res, next) {
     }
 }
 
-
+exports.recoverPassword = async function (req, res, next) {
+    // Req.Body contains the form submit values.
+    console.log("body", req.body)
+    var User = {
+        email: req.body.email,
+        safetyAnswer: req.body.safetyAnswer
+    }
+    try {
+        // Calling the Service function with the new object from the Request Body
+        var recoverUser = await UserService.recoverUser(User);
+        if (recoverUser === 0)
+            return res.status(400).json({message: "Error en la contraseña"})
+        else
+            return res.status(200).json({recoverUser, message: "Succesfully login"})
+    } catch (e) {
+        //Return an Error Response Message with Code and the Error Message.
+        return res.status(400).json({status: 400, message: "Invalid username or password"})
+    }
+}
     
     
